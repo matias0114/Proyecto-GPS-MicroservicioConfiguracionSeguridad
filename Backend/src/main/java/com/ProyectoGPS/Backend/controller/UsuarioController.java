@@ -20,9 +20,15 @@ public class UsuarioController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UsuarioDto signup(@RequestBody  UsuarioDto dto) {
-    return usuarioService.crear(dto);
-}
+    public UsuarioDto crear(@RequestBody UsuarioDto dto) {
+        return usuarioService.crear(dto);
+    }
+
+    @PostMapping("/signup")
+    @ResponseStatus(HttpStatus.CREATED)
+    public UsuarioDto signup(@RequestBody UsuarioDto dto) {
+        return usuarioService.signup(dto);
+    }
 
     @GetMapping
     public List<UsuarioDto> listarTodos() {
