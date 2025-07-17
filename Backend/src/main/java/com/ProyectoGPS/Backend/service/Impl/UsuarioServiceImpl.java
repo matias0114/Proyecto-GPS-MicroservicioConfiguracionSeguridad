@@ -1,8 +1,8 @@
+
 package com.ProyectoGPS.Backend.service.Impl;
 
 import com.ProyectoGPS.Backend.dto.UsuarioDto;
 import com.ProyectoGPS.Backend.model.Usuario;
-import com.ProyectoGPS.Backend.model.Rol;
 import com.ProyectoGPS.Backend.repository.UsuarioRepository;
 import com.ProyectoGPS.Backend.repository.RolRepository;
 import com.ProyectoGPS.Backend.service.UsuarioService;
@@ -10,8 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import java.util.stream.Collectors;
+import java.util.List;                  // ← IMPORTA ESTO
 import java.util.stream.Collectors;
 
 @Service
@@ -23,19 +23,26 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioDto crear(UsuarioDto dto) {
+        // tu lógica para crear
         Usuario u = new Usuario();
         u.setUsername(dto.getUsername());
         u.setPassword(passwordEncoder.encode(dto.getPassword()));
         u.setFullName(dto.getFullName());
         u.setEmail(dto.getEmail());
         u.setRoles(dto.getRoles().stream()
-            .map(nombre -> rolRepo.findByNombre(nombre)
-                .orElseThrow(() -> new EntityNotFoundException("Rol no existe: " + nombre)))
+            .map(rolRepo::findByNombre)
+            .map(opt -> opt.orElseThrow(() -> new EntityNotFoundException("Rol no existe")))
             .collect(Collectors.toSet()));
-        Usuario saved = usuarioRepo.save(u);
-        return mapToDto(saved);
+        return mapToDto(usuarioRepo.save(u));
     }
 
+    @Override
+    public UsuarioDto signup(UsuarioDto dto) {
+        // delega al mismo crear
+        return crear(dto);
+    }
+
+    // implementa el resto de métodos (listarTodos, obtenerPorId, actualizar, eliminar)
     @Override
     public List<UsuarioDto> listarTodos() {
         return usuarioRepo.findAll().stream()
@@ -70,7 +77,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         usuarioRepo.deleteById(id);
     }
-
     private UsuarioDto mapToDto(Usuario u) {
         UsuarioDto dto = new UsuarioDto();
         dto.setId(u.getId());
@@ -78,7 +84,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         dto.setFullName(u.getFullName());
         dto.setEmail(u.getEmail());
         dto.setRoles(u.getRoles().stream()
-            .map(Rol::getNombre)
+            .map(r -> r.getNombre())
             .collect(Collectors.toSet()));
         return dto;
     }
