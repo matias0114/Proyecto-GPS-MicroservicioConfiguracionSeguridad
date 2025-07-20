@@ -32,11 +32,11 @@ jobs:
         run: mvn clean install
 
       - name: Run Unit Tests
-        working-directory: Back/Backend
+        working-directory: Backend
         run: mvn test
 
       - name: Run Integration Tests
-        working-directory: Back/Backend
+        working-directory: Backend
         run: mvn verify -Dspring.profiles.active=test 
 
       - name: Set up Docker Buildx
